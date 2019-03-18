@@ -142,6 +142,91 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+        output = ""
+
+        if (not (fact_or_rule in self.facts) and not (fact_or_rule in self.rules)):
+            return(fact_or_rule.name + " is not in the KB")
+        if (fact_or_rule.name == "fact"):
+            for f in self.facts:
+                if (f.statement == fact_or_rule.statement):
+                    fact_or_rule = f
+        else:
+            for r in self.rules:
+                if (r.lhs == fact_or_rule.lhs):
+                    fact_or_rule = r
+
+        if (fact_or_rule.name == "fact"):
+            output += (fact_or_rule.name + ": " + str(fact_or_rule.statement))
+        else:
+            output += (fact_or_rule.name + ": ")
+            output += "("
+            for el in fact_or_rule.lhs:
+                output += str(el)
+            output += ")"
+            output += " -> " + str(fact_or_rule.rhs)
+
+        if (len(fact_or_rule.supported_by) != 0):
+            output += "\n"
+            for r in fact_or_rule.supported_by:
+                output += "  SUPPORTED BY\n"
+                for el in r:
+                    output += self.kb_explain_helper(el, 1)
+        else:
+            output += " ASSERTED"
+
+        return output
+
+
+
+    def kb_explain_helper(self, fact_or_rule, depth):
+
+        output = ""
+
+        if (not (fact_or_rule in self.facts) and not (fact_or_rule in self.rules)):
+            return(fact_or_rule.name + " is not in the KB")
+        if (fact_or_rule.name == "fact"):
+            for f in self.facts:
+                if (f.statement == fact_or_rule.statement):
+                    fact_or_rule = f
+        else:
+            for r in self.rules:
+                if (r.lhs == fact_or_rule.lhs):
+                    fact_or_rule = r
+
+        if (fact_or_rule.name == "fact"):
+            for i in range(0, (depth * 4) ):
+                output += " "
+            # output += "  "
+            output += (fact_or_rule.name + ": " + str(fact_or_rule.statement))
+        else:
+            for i in range(0, (depth * 4) ):
+                output += " "
+            # output += "  "
+            output += (fact_or_rule.name + ": ")
+            output += "("
+            for el in fact_or_rule.lhs:
+                output += str(el)
+                output += ", "
+            output = output[:-2]
+            output += ")"
+            output += " -> " + str(fact_or_rule.rhs)
+
+        if (len(fact_or_rule.supported_by) != 0):
+            output += "\n"
+            for i in range(0, (depth * 4) + 2 ):
+                output += " "
+            output += "SUPPORTED BY\n"
+
+            for r in fact_or_rule.supported_by:
+                for el in r:
+                    output += self.kb_explain_helper(el, depth + 1)
+                    # for i in range(0, (depth + 1) * 2):
+                    #     output += " "
+                    # output += "SUPPORTED BY\n"
+        else:
+            output += " ASSERTED\n"
+
+        return output
 
 
 class InferenceEngine(object):
@@ -154,7 +239,7 @@ class InferenceEngine(object):
             kb (KnowledgeBase) - A KnowledgeBase
 
         Returns:
-            Nothing            
+            Nothing
         """
         printv('Attempting to infer from {!r} and {!r} => {!r}', 1, verbose,
             [fact.statement, rule.lhs, rule.rhs])
